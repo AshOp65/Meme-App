@@ -1,7 +1,10 @@
 package com.example.memeland
 
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -20,12 +23,13 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     var currentImageUrl:String? =null
+    var memeUrl : String ?= null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         loadMeme()
     }
-    private fun loadMeme(){
+     private fun loadMeme(){
         progressBar.visibility= View.VISIBLE
        // nextButton.isEnabled=false
        // shareButton.isEnabled=false
@@ -36,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.GET, url, null,
             Response.Listener { response ->
+                memeUrl= response.getString("url")
              currentImageUrl = response.getString("url")
                 Glide.with(this).load(currentImageUrl).listener(object:RequestListener<Drawable>{
                     override fun onLoadFailed(
@@ -77,5 +82,14 @@ class MainActivity : AppCompatActivity() {
     }
     fun nextMeme(view: View) {
      loadMeme()
+    }
+    fun SaveMeme(view: View){
+        val request=DownloadManager.Request(Uri.parse(memeUrl))
+            .setTitle("Meme")
+            .setDescription("Downloading")
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setAllowedOverMetered(true)
+         val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        dm.enqueue(request)
     }
 }
